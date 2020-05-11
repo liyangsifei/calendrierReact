@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
-import ReactDOM from 'react-dom'
 import logo from './logo.svg';
 import './App.css';
+import moment from 'moment';
+
 
 class Title extends React.Component {
   constructor(props) {
@@ -18,7 +19,9 @@ class Title extends React.Component {
 class Clock extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {date: new Date()};
+    this.state = {
+      date: new Date()
+    };
   }
   componentDidMount() {
     this.timerID = setInterval(
@@ -43,38 +46,41 @@ class Clock extends React.Component {
   }
 }
 
-class Session extends React.Component {
-  constructor(props) {
-    super(props)
-  }
-  render() {
-    return (
-      <div>Session{this.props.value}</div>
-    )
-  }
-}
+const Sessions = ({ sessions }) => {
+  return (
+    <div>
+      <center><h1>Session List</h1></center>
+      {sessions.map((session) => (
+        <div>
+          <div>
+            <p>Activity: {session.activity}</p>
+            <p>Coach: {session.coach}</p>
+            <p>Level: {session.level}</p>
+            <p>Date start: {session.date_start}</p>
+            <p>Duration: {session.duration_minute} min</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+};
+
 class Day extends React.Component {
   constructor(props) {
     super(props)
   }
-  renderSession(i) {
-    return (
-      <Session
-        value={i}
-      />
-    )
-  }
   render() {
     return (
       <div>
-        <div>{this.props.value}</div>
-        {this.renderSession(0)}
+        <button
+          className="button day-btn"
+          onClick={() => this.props.onClick()}>{this.props.value}</button>
       </div>
     );
   }
 }
 
-class Week extends React.Component {
+class Calendar extends React.Component {
   constructor(props) {
     super(props);
   }
@@ -82,43 +88,24 @@ class Week extends React.Component {
     return (
       <Day
         value={i}
+        onClick={() => this.props.onClick()}
       />
     )
   }
   render() {
-    return (
-      <div className="div-row">
-        {this.renderDay('Monday')}
-        {this.renderDay("Tuesday")}
-        {this.renderDay("Wednesday")}
-        {this.renderDay("Thursday")}
-        {this.renderDay("Friday")}
-        {this.renderDay("Saturday")}
-        {this.renderDay("Sunday")}
-      </div>
-    )
-  }
-}
-
-class Calendar extends React.Component {
-  constructor(props) {
-    super(props);
-
-
-  }
-  renderWeek(i) {
-    return (
-      <Week
-        value={i}
-      />
-    )
-  }
-
-  render() {
+    const selectDay = this.props.value;
     return (
       <div>
-        {this.renderWeek('Hi')}
-        <div></div>
+      <div className="div-row">
+      {this.renderDay('Monday')}
+      {this.renderDay("Tuesday")}
+      {this.renderDay("Wednesday")}
+      {this.renderDay("Thursday")}
+      {this.renderDay("Friday")}
+      {this.renderDay("Saturday")}
+      {this.renderDay("Sunday")}
+      </div>
+        <div>{this.props.value}</div>
       </div>
     )
   }
@@ -127,76 +114,51 @@ class Calendar extends React.Component {
 class App extends Component {
   constructor(props) {
     super(props);
-    let st = 0;
-    let resp = [];
-
     this.state = {
-      st: st,
-      err: "start",
-      resp: resp,
-      ind: 0,
+      date: moment().format('YYYY-MM-DD'),
+      sessions: [],
     };
   }
 
-  doFetch() {
-    const myInit = {
-      method: 'GET',
-      dataType: 'json',
-      credentials: 'include',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-    };
+  componentDidMount() {
     const myAPI = 'https://back.staging.bsport.io/api/v1/offer/?company=6&page=4';
-
-    const myRequest = new Request(myAPI, myInit);
-    let s = 0;
-    let resp;
-    let e;
-
-    fetch(myRequest).then((response) => {
-      s = 1;
-      if (response.ok) {
-        s = 1;
-        return response.json();
-      } else {
-        return "error";
-      }
-    }).then(response => {
-      resp = response;
-    }).catch(function(err) {
-      e = err;
-    })
-    ;
-
-    this.setState({
-      st: s,
-      resp: resp,
-      err: e,
-    });
-
+    const today = this.state.date.toString();
+    fetch(myAPI)
+        .then(res => res.json())
+        .then((data) => {
+          let res = [];
+          let p = 0;
+          for (let k=0; k< data.results.length; k++) {
+            if (data.results[k].date_start.indexOf(today) > -1) {
+              res[p] = data.results[k];
+              p++;
+            }
+          }
+          this.setState({ sessions: res })
+        })
+        .catch(console.log);
 
   }
-
-
+  handleSelect(i) {
+    alert(i);
+  }
+  renderCalendar(i) {
+    return (
+      <Calendar
+        value={i}
+        onClick={() => this.handleSelect(i)}
+      />
+    )
+  }
   render() {
-    if(this.state.ind == 0) {
-      this.doFetch();
-      this.setState({
-        ind: 1,
-      });
-    }
-
+    moment().calendar();
     return (
       <div className="App">
         <div className="App-header">
           <Title name={this.props.name}/>
           <Clock />
-          <Calendar />
-          <div>{this.state.resp}</div>
-          <div>{this.state.st}</div>
-          <div>{this.state.err}</div>
+          {this.renderCalendar(this.state.date)}
+          <Sessions sessions={this.state.sessions} />
         </div>
       </div>
     )
