@@ -49,15 +49,15 @@ class Clock extends React.Component {
 const Sessions = ({ sessions }) => {
   return (
     <div>
-      <center><h1>Session List</h1></center>
+      <center><h2>Session List</h2></center>
       {sessions.map((session) => (
-        <div>
-          <div>
-            <p>Activity: {session.activity}</p>
-            <p>Coach: {session.coach}</p>
-            <p>Level: {session.level}</p>
-            <p>Date start: {session.date_start}</p>
-            <p>Duration: {session.duration_minute} min</p>
+        <div class="card">
+          <div class="card-inside">
+            <div>Activity: {session.activity}</div>
+            <div>Coach: {session.coach}</div>
+            <div>Level: {session.level}</div>
+            <div>Date start: {session.date_start}</div>
+            <div>Duration: {session.duration_minute} min</div>
           </div>
         </div>
       ))}
@@ -87,25 +87,22 @@ class Calendar extends React.Component {
   renderDay(i) {
     return (
       <Day
-        value={i}
-        onClick={() => this.props.onClick()}
+        value={this.props.weeks[i]}
+        onClick={() => this.props.onClick(i)}
       />
     )
   }
   render() {
-    const selectDay = this.props.value;
+    const selectDay = this.props.date;
     return (
-      <div>
       <div className="div-row">
-      {this.renderDay('Monday')}
-      {this.renderDay("Tuesday")}
-      {this.renderDay("Wednesday")}
-      {this.renderDay("Thursday")}
-      {this.renderDay("Friday")}
-      {this.renderDay("Saturday")}
-      {this.renderDay("Sunday")}
-      </div>
-        <div>{this.props.value}</div>
+      {this.renderDay(0)}
+      {this.renderDay(1)}
+      {this.renderDay(2)}
+      {this.renderDay(3)}
+      {this.renderDay(4)}
+      {this.renderDay(5)}
+      {this.renderDay(6)}
       </div>
     )
   }
@@ -115,6 +112,15 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      weeks: [
+        moment().format('YYYY-MM-DD'),
+        moment().add(1, 'days').format('YYYY-MM-DD'),
+        moment().add(2, 'days').format('YYYY-MM-DD'),
+        moment().add(3, 'days').format('YYYY-MM-DD'),
+        moment().add(4, 'days').format('YYYY-MM-DD'),
+        moment().add(5, 'days').format('YYYY-MM-DD'),
+        moment().add(6, 'days').format('YYYY-MM-DD'),
+      ],
       date: moment().format('YYYY-MM-DD'),
       sessions: [],
     };
@@ -137,27 +143,47 @@ class App extends Component {
           this.setState({ sessions: res })
         })
         .catch(console.log);
+  }
+  componentWillUpdate() {
+    const myAPI = 'https://back.staging.bsport.io/api/v1/offer/?company=6&page=4';
+    const today = this.state.date.toString();
+    fetch(myAPI)
+        .then(res => res.json())
+        .then((data) => {
+          let res = [];
+          let p = 0;
+          for (let k=0; k< data.results.length; k++) {
+            if (data.results[k].date_start.indexOf(today) > -1) {
+              res[p] = data.results[k];
+              p++;
+            }
+          }
+          this.setState({ sessions: res })
+        })
+        .catch(console.log);
 
   }
   handleSelect(i) {
-    alert(i);
+    this.setState({
+      date: this.state.weeks[i],
+    })
+    this.render();
   }
   renderCalendar(i) {
     return (
       <Calendar
-        value={i}
-        onClick={() => this.handleSelect(i)}
+        weeks={i}
+        onClick={i => this.handleSelect(i)}
       />
     )
   }
   render() {
-    moment().calendar();
     return (
       <div className="App">
         <div className="App-header">
           <Title name={this.props.name}/>
           <Clock />
-          {this.renderCalendar(this.state.date)}
+          {this.renderCalendar(this.state.weeks)}
           <Sessions sessions={this.state.sessions} />
         </div>
       </div>

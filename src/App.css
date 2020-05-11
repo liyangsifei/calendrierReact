@@ -40,7 +40,7 @@
 .button {
   background-color: #4CAF50;
   border: none;
-  color: white;
+  color: grey;
   padding: 16px 32px;
   text-align: center;
   text-decoration: none;
@@ -54,6 +54,14 @@
   background-color: white;
   color: black;
   border: 2px solid #e7e7e7;
+}
+.card {
+  border: 1px solid #000000;
+  margin: 10px 2px;
+  padding: 16px 32px;
+}
+.card-inside {
+  margin: 10px 10px;
 }
 
 @keyframes App-logo-spin {
