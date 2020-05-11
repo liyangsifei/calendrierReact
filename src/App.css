@@ -62,6 +62,7 @@
 }
 .card-inside {
   margin: 10px 10px;
+  text-align: left;
 }
 
 @keyframes App-logo-spin {

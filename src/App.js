@@ -85,9 +85,13 @@ class Calendar extends React.Component {
     super(props);
   }
   renderDay(i) {
+    const weekList = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const date = this.props.weeks[i];
+    const day = weekList[moment(this.props.weeks[i].toString()).day()];
+    const dateDay = date + " " + day;
     return (
       <Day
-        value={this.props.weeks[i]}
+        value={dateDay}
         onClick={() => this.props.onClick(i)}
       />
     )
