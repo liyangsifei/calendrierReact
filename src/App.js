@@ -148,16 +148,14 @@ class App extends Component {
         'Content-Type': 'application/json'
       },
     };
-    const myAPI = 'https://back.staging.bsport.io/api/v1/swagger/?format=openapi';
-    const myURL = 'https://petstore.swagger.io/v2/pet/1';
-    // const myAPI = '/api/v1/offer/?company=6&page=4';
+    const myAPI = 'https://back.staging.bsport.io/api/v1/offer/?company=6&page=4';
 
-    const myRequest = new Request('https://petstore.swagger.io/v2/pet/1');
+    const myRequest = new Request(myAPI, myInit);
     let s = 0;
     let resp;
     let e;
 
-    fetch(myURL).then((response) => {
+    fetch(myRequest).then((response) => {
       s = 1;
       if (response.ok) {
         s = 1;
